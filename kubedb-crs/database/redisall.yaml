@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-custom-auth
+  namespace: redis
+type: kubernetes.io/basic-auth
+stringData:
+  username: default
+  password: redis123
+---
+apiVersion: kubedb.com/v1
+kind: Redis
+metadata:
+  name: redis-cluster
+  namespace: redis
+spec:
+  version: "8.2.2"
+  mode: Standalone
+  replicas: 1
+
+  authSecret:
+    name: redis-custom-auth
+    externallyManaged: true
+
+  storageType: Durable
+  storage:
+    storageClassName: local-path
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 2Gi
+
+  serviceTemplates:
+    - alias: primary
+      metadata:
+        annotations:
+          metallb.io/address-pool: cinderip
+      spec:
+        type: LoadBalancer
+        ports:
+          - name: redis
+            port: 6379
+  monitor:
+    agent: prometheus.io/operator
+    prometheus:
+      exporter:
+        port: 9121
+      serviceMonitor:
+        labels:
+          release: kube-prom-stack
+        interval: 30s
+---
+apiVersion: autoscaling.kubedb.com/v1alpha1
+kind: RedisAutoscaler
+metadata:
+  name: redis-autoscaler
+  namespace: redis
+spec:
+  databaseRef:
+    name: redis-cluster
+
+  compute:
+    standalone:
+      minAllowed:
+        cpu: 400m
+        memory: 400Mi
+      maxAllowed:
+        cpu: "1"
+        memory: 1Gi
+      trigger: "On"
+      controlledResources:
+        - cpu
+        - memory
+      containerControlledValues: RequestsAndLimits
+
+  storage:
+    standalone:
+      expansionMode: Online
+      trigger: "On"
+      usageThreshold: 70
+      scalingThreshold: 60

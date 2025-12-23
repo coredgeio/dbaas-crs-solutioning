@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pg-custom-auth
+  namespace: postgres
+type: kubernetes.io/basic-auth
+stringData:
+  username: postgres
+  password: postgres123
+---
+apiVersion: kubedb.com/v1
+kind: Postgres
+metadata:
+  name: pg-cluster
+  namespace: postgres
+spec:
+  version: "16.10"
+
+  authSecret:
+    name: pg-custom-auth
+    externallyManaged: true
+
+  replicas: 1
+  standbyMode: Hot
+  streamingMode: Asynchronous
+
+  storageType: Durable
+  storage:
+    storageClassName: local-path
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 2Gi
+
+  leaderElection:
+    leaseDurationSeconds: 15
+    renewDeadlineSeconds: 10
+    retryPeriodSeconds: 2
+
+  serviceTemplates:
+    - alias: primary
+      metadata:
+        annotations:
+          metallb.io/address-pool: newip
+      spec:
+        type: LoadBalancer
+        ports:
+          - name: postgres
+            port: 5432
+
+    - alias: standby
+      spec:
+        type: ClusterIP
+        ports:
+          - name: postgres
+            port: 5432
+  monitor:
+    agent: prometheus.io/operator
+    prometheus:
+      exporter:
+        port: 9187
+      serviceMonitor:
+        labels:
+          release: kube-prom-stack
+        interval: 30s
+---
+apiVersion: autoscaling.kubedb.com/v1alpha1
+kind: PostgresAutoscaler
+metadata:
+  name: pg-autoscaler
+  namespace: postgres
+spec:
+  databaseRef:
+    name: pg-cluster
+
+  compute:
+    postgres:
+      minAllowed:
+        cpu: 500m
+        memory: 1Gi
+      maxAllowed:
+        cpu: "2"
+        memory: 4Gi
+      trigger: "On"
+
+  storage:
+    postgres:
+      expansionMode: Online
+      trigger: "On"
+      usageThreshold: 70
+      scalingThreshold: 60

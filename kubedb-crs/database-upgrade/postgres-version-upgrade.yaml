@@ -1,0 +1,13 @@
+apiVersion: ops.kubedb.com/v1alpha1
+kind: PostgresOpsRequest
+metadata:
+  name: pg-cluster-upgrade-17-2
+  namespace: postgres
+spec:
+  type: UpdateVersion
+  databaseRef:
+    name: pg-cluster
+  updateVersion:
+    targetVersion: "17.2"
+  timeout: 30m
+  apply: IfReady

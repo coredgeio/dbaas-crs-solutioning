@@ -1,0 +1,13 @@
+apiVersion: ops.kubedb.com/v1alpha1
+kind: ClickHouseOpsRequest
+metadata:
+  name: ch-upgrade-25-7-1
+  namespace: clickhouse
+spec:
+  type: UpdateVersion
+  databaseRef:
+    name: ch-cluster
+  updateVersion:
+    targetVersion: "25.7.1"
+  timeout: 30m
+  apply: IfReady

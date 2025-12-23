@@ -1,0 +1,14 @@
+apiVersion: ops.kubedb.com/v1alpha1
+apiVersion: ops.kubedb.com/v1alpha1
+kind: KafkaOpsRequest
+metadata:
+  name: kafka-upgrade-4-0-0
+  namespace: kafka
+spec:
+  type: UpdateVersion
+  databaseRef:
+    name: kafka-cluster
+  updateVersion:
+    targetVersion: "4.0.0"
+  timeout: 30m
+  apply: IfReady

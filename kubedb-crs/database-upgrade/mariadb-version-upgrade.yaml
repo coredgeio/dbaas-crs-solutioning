@@ -1,0 +1,13 @@
+apiVersion: ops.kubedb.com/v1alpha1
+kind: MariaDBOpsRequest
+metadata:
+  name: mariadb-upgrade-11-6-2
+  namespace: mariadb
+spec:
+  type: UpdateVersion
+  databaseRef:
+    name: mariadb-cluster
+  updateVersion:
+    targetVersion: "11.6.2"
+  timeout: 30m
+  apply: IfReady

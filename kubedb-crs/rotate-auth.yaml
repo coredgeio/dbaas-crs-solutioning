@@ -1,0 +1,28 @@
+apiVersion: ops.kubedb.com/v1alpha1
+kind: MongoDBOpsRequest
+metadata:
+  name: mongo-rs-rotate-auth
+  namespace: mongo
+spec:
+  type: RotateAuth
+  databaseRef:
+    name: mongo-rs
+  authentication:
+    secretRef:
+      kind: Secret
+      name: mongo-custom-auth
+  timeout: 5m
+  apply: IfReady
+
+---
+apiVersion: ops.kubedb.com/v1alpha1
+kind: ClickHouseOpsRequest
+metadata:
+  name: clickhouse-horizontal-scaling
+  namespace: clickhouse
+spec:
+  type: HorizontalScaling
+  databaseRef:
+    name: ch-cluster
+  horizontalScaling:
+    replicas: 4

@@ -1,0 +1,13 @@
+apiVersion: ops.kubedb.com/v1alpha1
+kind: RedisOpsRequest
+metadata:
+  name: redis-upgrade-8-2-2
+  namespace: redis
+spec:
+  type: UpdateVersion
+  databaseRef:
+    name: redis-cluster
+  updateVersion:
+    targetVersion: "8.2.2"
+  timeout: 20m
+  apply: IfReady

@@ -1,0 +1,13 @@
+apiVersion: ops.kubedb.com/v1alpha1
+kind: MongoDBOpsRequest
+metadata:
+  name: mongo-rs-upgrade-7-0-16
+  namespace: mongo
+spec:
+  type: UpdateVersion
+  databaseRef:
+    name: mongo-rs
+  updateVersion:
+    targetVersion: "7.0.16"
+  timeout: 30m
+  apply: IfReady

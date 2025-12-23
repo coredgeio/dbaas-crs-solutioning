@@ -1,0 +1,13 @@
+apiVersion: ops.kubedb.com/v1alpha1
+kind: MySQLOpsRequest
+metadata:
+  name: mysql-upgrade-8-2-0
+  namespace: mysql
+spec:
+  type: UpdateVersion
+  databaseRef:
+    name: mysql-cluster
+  updateVersion:
+    targetVersion: "8.2.0"
+  timeout: 30m
+  apply: IfReady
